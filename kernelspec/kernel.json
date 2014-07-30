@@ -1,0 +1,5 @@
+{"argv":["python","-m","gdl_kernel", "-f", "{connection_file}"],
+ "display_name":"GDL",
+ "language":"GDL",
+ "codemirror_mode":"GDL"
+}

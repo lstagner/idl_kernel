@@ -54,14 +54,15 @@ class GDLKernel(Kernel):
         plot_format = 'png'
 
         precall='''
-        if !inline then begin
+        old_inline_Ada252z=!inline
+        if !inline and old_inline_Ada252z then begin
             set_plot,'z'
             device, z_buffering = 1
         endif
         '''
 
         postcall = '''
-        if !inline then begin
+        if !inline and old_inline_Ada252z then begin
             ; load color table info
             tvlct, r_m9QVFuGP,g_jeeyfQkN,b_mufcResT, /get
         
@@ -89,12 +90,13 @@ class GDLKernel(Kernel):
             output = self.gdlwrapper.run_command(".run "+tfile.name, timeout=None)
 
             # Publish images (only one for now)
-            images = [open(imgfile, 'rb').read() for imgfile in glob("%s/__fig.png" % plot_dir)]
+            #images = [open(imgfile, 'rb').read() for imgfile in glob("%s/__fig.png" % plot_dir)]
+            images = [open('/home/lstagner/image.png', 'rb').read()]
 
             display_data=[]
 
             for image in images:
-                display_data.append({'image/png': image})
+                display_data.append({'image/png': image.encode('base64')})
 
             for data in display_data:
                 self.send_response(self.iopub_socket, 'display_data',data)

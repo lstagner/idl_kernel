@@ -127,9 +127,9 @@ class GDLKernel(Kernel):
             return {'status': 'ok', 'execution_count': self.execution_count,
                     'payloads': [], 'user_expressions': {}}
 
-        def do_shutdown(self, restart):
-                self.gdlwrapper.child.kill(signal.SIGKILL)
-                return {'status':'ok', 'restart':restart}
+    def do_shutdown(self, restart):
+        self.gdlwrapper.child.kill(signal.SIGKILL)
+        return {'status':'ok', 'restart':restart}
 
 if __name__ == '__main__':
     from IPython.kernel.zmq.kernelapp import IPKernelApp

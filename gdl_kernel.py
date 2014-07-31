@@ -90,8 +90,7 @@ class GDLKernel(Kernel):
             output = self.gdlwrapper.run_command(".run "+tfile.name, timeout=None)
 
             # Publish images (only one for now)
-            #images = [open(imgfile, 'rb').read() for imgfile in glob("%s/__fig.png" % plot_dir)]
-            images = [open('/home/lstagner/image.png', 'rb').read()]
+            images = [open(imgfile, 'rb').read() for imgfile in glob("%s/__fig.png" % plot_dir)]
 
             display_data=[]
 

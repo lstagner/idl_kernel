@@ -94,10 +94,10 @@ class GDLKernel(Kernel):
             display_data=[]
 
             for image in images:
-                display_data.append(('GDL', {'image/png': image}))
+                display_data.append({'image/png': image})
 
-            for source, data in display_data:
-                publish_display_data(data,source=source)
+            for data in display_data:
+                self.send_response(self.iopub_socket, 'display_data',data)
         except KeyboardInterrupt:
             self.gdlwrapper.child.sendintr()
             interrupted = True

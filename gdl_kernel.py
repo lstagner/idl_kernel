@@ -8,6 +8,7 @@ import tempfile
 import re
 from glob import glob
 from shutil import rmtree
+from base64 import b64encode
 
 __version__ = '0.1'
 
@@ -95,10 +96,10 @@ class GDLKernel(Kernel):
             display_data=[]
 
             for image in images:
-                display_data.append({'image/png': image.encode('base64')})
+                display_data.append({'image/png': b64encode(image).decode('ascii')})
 
             for data in display_data:
-                self.send_response(self.iopub_socket, 'display_data',data)
+                self.send_response(self.iopub_socket, 'display_data',{'data':data})
         except KeyboardInterrupt:
             self.gdlwrapper.child.sendintr()
             interrupted = True

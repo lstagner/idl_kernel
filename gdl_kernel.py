@@ -54,20 +54,13 @@ class GDLKernel(Kernel):
         plot_dir = tempfile.mkdtemp()
         plot_format = 'png'
 
-        precall='''
-        old_inline_Ada252z=!inline
-        if !inline and old_inline_Ada252z then begin
-            set_plot,'z'
-            device, z_buffering = 1
-        endif
-        '''
-
         postcall = '''
-        if !inline and old_inline_Ada252z then begin
+		device,window_state=winds_arefgij
+		if !inline and total(winds_arefgij) ne 0 then begin
             ; load color table info
             tvlct, r_m9QVFuGP,g_jeeyfQkN,b_mufcResT, /get
-        
             img_bGr4ea3s = tvrd()
+            wdelete
 
             outfile_c5BXq4dV = '%(plot_dir)s/__fig.png'
             ; Set the colors for each channel
@@ -81,12 +74,12 @@ class GDLKernel(Kernel):
             if total(img_bGr4ea3s) ne 0 then begin
                 write_png, outfile_c5BXq4dV, ii_rsApk4JS, r_m9QVFuGP, g_jeeyfQkN, b_mufcResT
             endif
-        endif
+		endif
         end
         ''' % locals()
 
         try:
-            tfile.file.write(precall+code.rstrip()+postcall.rstrip())
+            tfile.file.write(code.rstrip()+postcall.rstrip())
             tfile.file.close()
             output = self.gdlwrapper.run_command(".run "+tfile.name, timeout=None)
 

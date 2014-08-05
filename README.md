@@ -4,7 +4,7 @@ Demo [Notebook](http://nbviewer.ipython.org/github/lstagner/idl_kernel/blob/mast
 
 To install:
 
-This requires the current development version of IPython 3.0-dev
+This requires IPython 3.0-dev and Pexpect 3.3
 
 ```
 sudo python setup.py install

@@ -1,9 +1,13 @@
-IDL/GDL kernel for Jupyter
+#IDL/GDL kernel for Jupyter
 
-This requires the current development version of IPython 3.0-dev
+Demo [Notebook](http://nbviewer.ipython.org/github/lstagner/idl_kernel/blob/master/demo.ipynb)
 
 To install:
-```sudo python setup.py install```
+This requires the current development version of IPython 3.0-dev
+
+```
+sudo python setup.py install
+```
 
 This should make an IDL directory containing the kernelspec in the ~/.ipython/kernels directory. If the directory is not made then manually create the directory with the following commands.
 

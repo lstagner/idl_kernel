@@ -3,6 +3,7 @@
 Demo [Notebook](http://nbviewer.ipython.org/github/lstagner/idl_kernel/blob/master/demo.ipynb)
 
 To install:
+
 This requires the current development version of IPython 3.0-dev
 
 ```

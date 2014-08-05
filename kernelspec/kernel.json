@@ -1,5 +1,5 @@
-{"argv":["python","-m","gdl_kernel", "-f", "{connection_file}"],
- "display_name":"GDL",
- "language":"GDL",
- "codemirror_mode":"GDL"
+{"argv":["python","-m","idl_kernel", "-f", "{connection_file}"],
+ "display_name":"IDL",
+ "language":"IDL",
+ "codemirror_mode":"IDL"
 }

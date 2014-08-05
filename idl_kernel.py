@@ -14,10 +14,10 @@ __version__ = '0.1'
 
 version_pat = re.compile(r'Version (\d+(\.\d+)+)')
 
-class GDLKernel(Kernel):
-    implementation = 'gdl_kernel'
+class IDLKernel(Kernel):
+    implementation = 'IDL_kernel'
     implementation_version = __version__
-    language = 'GDL'
+    language = 'IDL'
     @property
     def language_version(self):
         m = version_pat.search(self.banner)
@@ -27,7 +27,10 @@ class GDLKernel(Kernel):
     @property
     def banner(self):
         if self._banner is None:
-            self._banner = check_output(['gdl', '--version']).decode('utf-8')
+            try:
+                self._banner = check_output(['idl', '-e "" ']).decode('utf-8')
+            except:
+                self._banner = check_output(['gdl', '--version']).decode('utf-8')
         return self._banner
     
     def __init__(self, **kwargs):
@@ -38,10 +41,13 @@ class GDLKernel(Kernel):
         # so that bash and its children are interruptible.
         sig = signal.signal(signal.SIGINT, signal.SIG_DFL)
         try:
-            self.gdlwrapper = replwrap.REPLWrapper("gdl",u"GDL> ",None)
-            self.gdlwrapper.run_command("!quiet=1 & defsysv,'!inline',0".rstrip(), timeout=None)
+            self.idlwrapper = replwrap.REPLWrapper("idl",u"IDL> ",None)
+        except:
+            self.idlwrapper = replwrap.REPLWrapper("gdl",u"GDL> ",None)
         finally:
             signal.signal(signal.SIGINT, sig)
+
+        self.idlwrapper.run_command("!quiet=1 & defsysv,'!inline',0".rstrip(), timeout=None)
 
     def do_execute(self, code, silent, store_history=True, user_expressions=None,
                    allow_stdin=False):
@@ -81,7 +87,7 @@ class GDLKernel(Kernel):
         try:
             tfile.file.write(code.rstrip()+postcall.rstrip())
             tfile.file.close()
-            output = self.gdlwrapper.run_command(".run "+tfile.name, timeout=None)
+            output = self.idlwrapper.run_command(".run "+tfile.name, timeout=None)
 
             # Publish images (only one for now)
             images = [open(imgfile, 'rb').read() for imgfile in glob("%s/__fig.png" % plot_dir)]
@@ -94,10 +100,10 @@ class GDLKernel(Kernel):
             for data in display_data:
                 self.send_response(self.iopub_socket, 'display_data',{'data':data,'metadata':{'image/png':{'width':683,'height':384}}})
         except KeyboardInterrupt:
-            self.gdlwrapper.child.sendintr()
+            self.idlwrapper.child.sendintr()
             interrupted = True
-            self.gdlwrapper._expect_prompt()
-            output = self.gdlwrapper.child.before
+            self.idlwrapper._expect_prompt()
+            output = self.idlwrapper.child.before
         finally:
             tfile.close()
             rmtree(plot_dir)
@@ -122,9 +128,9 @@ class GDLKernel(Kernel):
                     'payloads': [], 'user_expressions': {}}
 
     def do_shutdown(self, restart):
-        self.gdlwrapper.child.kill(signal.SIGKILL)
+        self.idlwrapper.child.kill(signal.SIGKILL)
         return {'status':'ok', 'restart':restart}
 
 if __name__ == '__main__':
     from IPython.kernel.zmq.kernelapp import IPKernelApp
-    IPKernelApp.launch_instance(kernel_class=GDLKernel)
+    IPKernelApp.launch_instance(kernel_class=IDLKernel)

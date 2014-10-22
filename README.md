@@ -7,7 +7,7 @@ To install:
 This requires IPython 3.0-dev and Pexpect 3.3
 
 ```
-sudo python setup.py install --prefix=~/.local
+python setup.py install --prefix=~/.local
 ```
 
 This should make an IDL directory containing the kernelspec in the ~/.ipython/kernels directory.

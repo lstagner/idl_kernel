@@ -1,6 +1,6 @@
 from IPython.kernel.zmq.kernelbase import Kernel
 from IPython.core.displaypub import publish_display_data
-from pexpect import replwrap
+from pexpect import replwrap,EOF
 
 import signal
 from subprocess import check_output
@@ -54,10 +54,14 @@ class IDLKernel(Kernel):
 
     def do_execute(self, code, silent, store_history=True, user_expressions=None,
                    allow_stdin=False):
+
         if not code.strip():
             return {'status': 'ok', 'execution_count': self.execution_count,
                     'payloads': [], 'user_expressions': {}}
-
+        elif (code.strip() == 'exit' or code.strip() == 'quit'):
+            self.do_shutdown(False)
+            return {'status':'abort','execution_count':self.execution_count}
+ 
         interrupted = False
         tfile = tempfile.NamedTemporaryFile(mode='w+t')
         plot_dir = tempfile.mkdtemp()
@@ -111,7 +115,7 @@ class IDLKernel(Kernel):
             interrupted = True
             self.idlwrapper._expect_prompt()
             output = self.idlwrapper.child.before
-        except pexpect.EOF:
+        except EOF:
             output = self.idlwrapper.child.before + 'Restarting IDL'
             self._start_idl()
         finally:

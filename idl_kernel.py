@@ -1,4 +1,5 @@
 from IPython.kernel.zmq.kernelbase import Kernel
+from IPython.utils.path import locate_profile
 from IPython.core.displaypub import publish_display_data
 from pexpect import replwrap,EOF
 
@@ -37,6 +38,15 @@ class IDLKernel(Kernel):
         Kernel.__init__(self, **kwargs)
         self._start_idl()
 
+        try:
+            self.hist_file = os.path.join(locate_profile(),'idl_kernel.hist')
+        except:
+            self.hist_file = None
+            self.log.warn('No default profile found, history unavailable')
+
+        self.max_hist_cache = 1000
+        self.hist_cache = []
+
     def _start_idl(self):
         # Signal handlers are inherited by forked processes, and we can't easily
         # reset it from the subprocess. Since kernelapp ignores SIGINT except in
@@ -62,6 +72,9 @@ class IDLKernel(Kernel):
             self.do_shutdown(False)
             return {'status':'abort','execution_count':self.execution_count}
  
+        if code.strip() and store_history:
+            self.hist_cache.append(code.strip())
+
         interrupted = False
         tfile = tempfile.NamedTemporaryFile(mode='w+t')
         plot_dir = tempfile.mkdtemp()
@@ -100,7 +113,7 @@ class IDLKernel(Kernel):
             tfile.file.close()
             output = self.idlwrapper.run_command(".run "+tfile.name, timeout=None)
 
-            # Publish images (only one for now)
+            # Publish images if there are any
             images = [open(imgfile, 'rb').read() for imgfile in glob("%s/*.png" % plot_dir)]
 
             display_data=[]
@@ -141,8 +154,37 @@ class IDLKernel(Kernel):
             return {'status': 'ok', 'execution_count': self.execution_count,
                     'payloads': [], 'user_expressions': {}}
 
+    def do_history(self, hist_access_type, output, raw, session=None,
+                   start=None, stop=None, n=None, pattern=None, unique=False):
+
+        if not self.hist_file:
+            return {'history': []}
+
+        if not os.path.exists(self.hist_file):
+            with open(self.hist_file, 'wb') as f:
+                f.write('')
+
+        with open(self.hist_file, 'rb') as f:
+            history = f.readlines()
+
+        history = history[:self.max_hist_cache]
+        self.hist_cache = history
+        self.log.debug('**HISTORY:')
+        self.log.debug(history)
+        history = [(None, None, h) for h in history]
+
+        return {'history': history}
+
     def do_shutdown(self, restart):
+        self.log.debug("**Shutting down")
+
         self.idlwrapper.child.kill(signal.SIGKILL)
+
+        if self.hist_file:
+            with open(self.hist_file,'wb') as f:
+                data = '\n'.join(self.hist_cache[-self.max_hist_cache:])
+                fid.write(data.encode('utf-8'))
+
         return {'status':'ok', 'restart':restart}
 
 if __name__ == '__main__':

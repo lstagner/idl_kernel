@@ -30,9 +30,9 @@ class IDLKernel(Kernel):
     @property
     def banner(self):
         if self._banner is None:
-            try:
+            if os.path.basename(self._executable) == 'idl':
                 self._banner = check_output([self._executable, '-e "" ']).decode('utf-8')
-            except:
+            else:
                 self._banner = check_output([self._executable, '--version']).decode('utf-8')
         return self._banner
     

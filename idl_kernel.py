@@ -117,6 +117,10 @@ class IDLKernel(Kernel):
             tfile.file.close()
             output = self.idlwrapper.run_command(".run "+tfile.name, timeout=None)
 
+            # IDL annoying prints out ".run tmp..." command this removes it
+            if os.path.basename(self._executable) == 'idl':
+                output = '\n'.join(output.splitlines()[1::])+'\n'
+
             # Publish images if there are any
             images = [open(imgfile, 'rb').read() for imgfile in glob("%s/*.png" % plot_dir)]
 

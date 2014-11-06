@@ -130,7 +130,7 @@ class IDLKernel(Kernel):
                 display_data.append({'image/png': b64encode(image).decode('ascii')})
 
             for data in display_data:
-                self.send_response(self.iopub_socket, 'display_data',{'data':data})
+                self.send_response(self.iopub_socket, 'display_data',{'data':data,'metadata':{}})
         except KeyboardInterrupt:
             self.idlwrapper.child.sendintr()
             interrupted = True

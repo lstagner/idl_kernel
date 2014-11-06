@@ -7,11 +7,13 @@ import signal
 from subprocess import check_output
 import tempfile
 import re
+import os
 from glob import glob
 from shutil import rmtree
 from base64 import b64encode
+from distutils.spawn import find_executable
 
-__version__ = '0.2'
+__version__ = '0.3'
 
 version_pat = re.compile(r'Version (\d+(\.\d+)+)')
 
@@ -29,9 +31,9 @@ class IDLKernel(Kernel):
     def banner(self):
         if self._banner is None:
             try:
-                self._banner = check_output(['idl', '-e "" ']).decode('utf-8')
+                self._banner = check_output([self._executable, '-e "" ']).decode('utf-8')
             except:
-                self._banner = check_output(['gdl', '--version']).decode('utf-8')
+                self._banner = check_output([self._executable, '--version']).decode('utf-8')
         return self._banner
     
     def __init__(self, **kwargs):
@@ -54,9 +56,11 @@ class IDLKernel(Kernel):
         # so that IDL and its children are interruptible.
         sig = signal.signal(signal.SIGINT, signal.SIG_DFL)
         try:
-            self.idlwrapper = replwrap.REPLWrapper("idl",u"IDL> ",None)
+            self._executable = find_executable("idl")
+            self.idlwrapper = replwrap.REPLWrapper(self._executable,u"IDL> ",None)
         except:
-            self.idlwrapper = replwrap.REPLWrapper("gdl",u"GDL> ",None)
+            self._executable = find_executable("gdl")
+            self.idlwrapper = replwrap.REPLWrapper(self._executable,u"GDL> ",None)
         finally:
             signal.signal(signal.SIGINT, sig)
 
@@ -76,8 +80,8 @@ class IDLKernel(Kernel):
             self.hist_cache.append(code.strip())
 
         interrupted = False
-        tfile = tempfile.NamedTemporaryFile(mode='w+t')
-        plot_dir = tempfile.mkdtemp()
+        tfile = tempfile.NamedTemporaryFile(mode='w+t',dir=os.getenv("HOME"))
+        plot_dir = tempfile.mkdtemp(dir=os.getenv("HOME"))
         plot_format = 'png'
 
         postcall = """
@@ -183,7 +187,7 @@ class IDLKernel(Kernel):
         if self.hist_file:
             with open(self.hist_file,'wb') as f:
                 data = '\n'.join(self.hist_cache[-self.max_hist_cache:])
-                fid.write(data.encode('utf-8'))
+                f.write(data.encode('utf-8'))
 
         return {'status':'ok', 'restart':restart}
 

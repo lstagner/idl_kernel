@@ -75,7 +75,11 @@ class IDLKernel(Kernel):
         elif (code.strip() == 'exit' or code.strip() == 'quit'):
             self.do_shutdown(False)
             return {'status':'abort','execution_count':self.execution_count}
- 
+        elif code.strip().startswith('.'):
+            # This is a IDL Executive command
+            output = self.idlwrapper.run_command(code.strip(), timeout=None) 
+            return {'status': 'ok', 'execution_count': self.execution_count,
+                    'payloads': [], 'user_expressions': {}}
         if code.strip() and store_history:
             self.hist_cache.append(code.strip())
 

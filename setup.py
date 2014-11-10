@@ -7,7 +7,7 @@ import sys
 kernel_json = {"argv":[sys.executable,"-m","idl_kernel","-f","{connection_file}"],
                "display_name":"IDL",
                "language":"IDL",
-               "codemirror_mode":"text"}
+               "codemirror_mode":"idl"}
 
 class install_with_kernelspec(install):
     def run(self):

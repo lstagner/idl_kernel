@@ -95,8 +95,8 @@ class IDLKernel(Kernel):
             self.hist_cache.append(code.strip())
 
         interrupted = False
-        tfile = tempfile.NamedTemporaryFile(mode='w+t',dir=os.getenv("HOME"))
-        plot_dir = tempfile.mkdtemp(dir=os.getenv("HOME"))
+        tfile = tempfile.NamedTemporaryFile(mode='w+t',dir=os.path.expanduser("~"))
+        plot_dir = tempfile.mkdtemp(dir=os.path.expanduser("~"))
         plot_format = 'png'
 
         postcall = """

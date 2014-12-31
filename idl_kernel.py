@@ -1,7 +1,7 @@
 from IPython.kernel.zmq.kernelbase import Kernel
 from IPython.utils.path import locate_profile
 from IPython.core.displaypub import publish_display_data
-from pexpect import replwrap,EOF
+from pexpect import replwrap,EOF,spawn
 
 import signal
 from subprocess import check_output
@@ -57,10 +57,12 @@ class IDLKernel(Kernel):
         sig = signal.signal(signal.SIGINT, signal.SIG_DFL)
         try:
             self._executable = find_executable("idl")
-            self.idlwrapper = replwrap.REPLWrapper(self._executable,u"IDL> ",None)
+            self._child  = spawn(self._executable,timeout = 300)
+            self.idlwrapper = replwrap.REPLWrapper(self._child,u"IDL> ",None)
         except:
             self._executable = find_executable("gdl")
-            self.idlwrapper = replwrap.REPLWrapper(self._executable,u"GDL> ",None)
+            self._child  = spawn(self._executable,timeout = 300)
+            self.idlwrapper = replwrap.REPLWrapper(self._child,u"GDL> ",None)
         finally:
             signal.signal(signal.SIGINT, sig)
 
@@ -100,30 +102,30 @@ class IDLKernel(Kernel):
         plot_format = 'png'
 
         postcall = """
-		device,window_state=winds_arefgij
-		if !inline and total(winds_arefgij) ne 0 then begin
-            w_CcjqL6MA = where(winds_arefgij ne 0,nw_CcjqL6MA)
-            for i_KEv8eW6E=0,nw_CcjqL6MA-1 do begin
-                wset,w_CcjqL6MA[i_KEv8eW6E]
-                ; load color table info
-                tvlct, r_m9QVFuGP,g_jeeyfQkN,b_mufcResT, /get
-                img_bGr4ea3s = tvrd()
-                wdelete
+            device,window_state=winds_arefgij
+            if !inline and total(winds_arefgij) ne 0 then begin
+                w_CcjqL6MA = where(winds_arefgij ne 0,nw_CcjqL6MA)
+                for i_KEv8eW6E=0,nw_CcjqL6MA-1 do begin
+                    wset,w_CcjqL6MA[i_KEv8eW6E]
+                    ; load color table info
+                    tvlct, r_m9QVFuGP,g_jeeyfQkN,b_mufcResT, /get
+                    img_bGr4ea3s = tvrd()
+                    wdelete
 
-                outfile_c5BXq4dV = '%(plot_dir)s/__fig'+strtrim(i_KEv8eW6E,2)+'.png'
-                ; Set the colors for each channel
-                s_m77YL7Gd = size(img_bGr4ea3s)
-                ii_rsApk4JS=bytarr(3,s_m77YL7Gd[1],s_m77YL7Gd[2])
-                ii_rsApk4JS[0,*,*]=r_m9QVFuGP[img_bGr4ea3s]
-                ii_rsApk4JS[1,*,*]=g_jeeyfQkN[img_bGr4ea3s]
-                ii_rsApk4JS[2,*,*]=b_mufcResT[img_bGr4ea3s]
+                    outfile_c5BXq4dV = '%(plot_dir)s/__fig'+strtrim(i_KEv8eW6E,2)+'.png'
+                    ; Set the colors for each channel
+                    s_m77YL7Gd = size(img_bGr4ea3s)
+                    ii_rsApk4JS=bytarr(3,s_m77YL7Gd[1],s_m77YL7Gd[2])
+                    ii_rsApk4JS[0,*,*]=r_m9QVFuGP[img_bGr4ea3s]
+                    ii_rsApk4JS[1,*,*]=g_jeeyfQkN[img_bGr4ea3s]
+                    ii_rsApk4JS[2,*,*]=b_mufcResT[img_bGr4ea3s]
 
-                ; Write the PNG if the image is not blank
-                if total(img_bGr4ea3s) ne 0 then begin
-                    write_png, outfile_c5BXq4dV, ii_rsApk4JS, r_m9QVFuGP, g_jeeyfQkN, b_mufcResT
-                endif
-            endfor
-		endif
+                    ; Write the PNG if the image is not blank
+                    if total(img_bGr4ea3s) ne 0 then begin
+                        write_png, outfile_c5BXq4dV, ii_rsApk4JS, r_m9QVFuGP, g_jeeyfQkN, b_mufcResT
+                    endif
+                endfor
+	    endif
         end
         """ % locals()
 

@@ -18,7 +18,7 @@ __version__ = '0.3'
 version_pat = re.compile(r'Version (\d+(\.\d+)+)')
 
 class IDLKernel(Kernel):
-    implementation = 'IDL_kernel'
+    implementation = 'idl_kernel'
     implementation_version = __version__
     language = 'IDL'
     @property
@@ -36,6 +36,11 @@ class IDLKernel(Kernel):
                 self._banner = check_output([self._executable, '--version']).decode('utf-8')
         return self._banner
     
+    language_info = {'name': 'idl',
+                     'codemirror_mode': 'idl',
+                     'mimetype': 'text/x-idl',
+                     'file_extension': '.pro'}
+
     def __init__(self, **kwargs):
         Kernel.__init__(self, **kwargs)
         self._start_idl()

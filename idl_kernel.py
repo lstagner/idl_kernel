@@ -13,7 +13,7 @@ from shutil import rmtree
 from base64 import b64encode
 from distutils.spawn import find_executable
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 version_pat = re.compile(r'Version (\d+(\.\d+)+)')
 

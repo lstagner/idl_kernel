@@ -71,7 +71,7 @@ class IDLKernel(Kernel):
         finally:
             signal.signal(signal.SIGINT, sig)
 
-        self.idlwrapper.run_command("!quiet=1 & !more=0 & defsysv,'!inline',0".rstrip(), timeout=None)
+        self.idlwrapper.run_command("!quiet=1 & defsysv,'!inline',0 & !more=0".rstrip(), timeout=None)
 
     def do_execute(self, code, silent, store_history=True, user_expressions=None,
                    allow_stdin=False):

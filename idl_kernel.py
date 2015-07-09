@@ -72,6 +72,9 @@ class IDLKernel(Kernel):
             signal.signal(signal.SIGINT, sig)
 
         self.idlwrapper.run_command("!quiet=1 & !more=0 & defsysv,'!inline',0".rstrip(), timeout=None)
+        # Compile IDL routines/functions
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        self.idlwrapper.run_command(".compile "+dirname+"/snapshot.pro",timeout=None)
 
     def do_execute(self, code, silent, store_history=True, user_expressions=None,
                    allow_stdin=False):
@@ -84,7 +87,7 @@ class IDLKernel(Kernel):
             self.do_shutdown(False)
             return {'status':'abort','execution_count':self.execution_count}
 
-        elif code.strip().startswith('.'):
+        elif (code.strip().startswith('.') or code.strip().startswith('@')):
             # This is a IDL Executive command
             output = self.idlwrapper.run_command(code.strip(), timeout=None) 
 
@@ -111,26 +114,12 @@ class IDLKernel(Kernel):
             if !inline and total(winds_arefgij) ne 0 then begin
                 w_CcjqL6MA = where(winds_arefgij ne 0,nw_CcjqL6MA)
                 for i_KEv8eW6E=0,nw_CcjqL6MA-1 do begin
-                    wset,w_CcjqL6MA[i_KEv8eW6E]
-                    ; load color table info
-                    tvlct, r_m9QVFuGP,g_jeeyfQkN,b_mufcResT, /get
-                    img_bGr4ea3s = tvrd()
-                    wdelete
-
+                    wset, w_CcjqL6MA[i_KEv8eW6E]
                     outfile_c5BXq4dV = '%(plot_dir)s/__fig'+strtrim(i_KEv8eW6E,2)+'.png'
-                    ; Set the colors for each channel
-                    s_m77YL7Gd = size(img_bGr4ea3s)
-                    ii_rsApk4JS=bytarr(3,s_m77YL7Gd[1],s_m77YL7Gd[2])
-                    ii_rsApk4JS[0,*,*]=r_m9QVFuGP[img_bGr4ea3s]
-                    ii_rsApk4JS[1,*,*]=g_jeeyfQkN[img_bGr4ea3s]
-                    ii_rsApk4JS[2,*,*]=b_mufcResT[img_bGr4ea3s]
-
-                    ; Write the PNG if the image is not blank
-                    if total(img_bGr4ea3s) ne 0 then begin
-                        write_png, outfile_c5BXq4dV, ii_rsApk4JS, r_m9QVFuGP, g_jeeyfQkN, b_mufcResT
-                    endif
+                    ii_rsApk4JS = snapshot(outfile_c5BXq4dV)
+                    wdelete
                 endfor
-	    endif
+	        endif
         end
         """ % locals()
 

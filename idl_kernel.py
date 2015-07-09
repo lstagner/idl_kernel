@@ -13,7 +13,7 @@ from shutil import rmtree
 from base64 import b64encode
 from distutils.spawn import find_executable
 
-__version__ = '0.3'
+__version__ = '0.4'
 
 version_pat = re.compile(r'Version (\d+(\.\d+)+)')
 
@@ -23,17 +23,24 @@ class IDLKernel(Kernel):
     language = 'IDL'
     @property
     def language_version(self):
-        m = version_pat.search(self.banner)
-        return m.group(1)
+        try:
+            m = version_pat.search(self.banner)
+            return m.group(1)
+        except:
+            return "Version ?.?"
 
     _banner = None
     @property
     def banner(self):
         if self._banner is None:
-            if os.path.basename(self._executable) == 'idl':
-                self._banner = check_output([self._executable, '-e "" ']).decode('utf-8')
-            else:
-                self._banner = check_output([self._executable, '--version']).decode('utf-8')
+            try:
+                if os.path.basename(self._executable) == 'idl':
+                    self._banner = check_output([self._executable, '-e','"print,string(0B)"']).decode('utf-8')
+                else:
+                    self._banner = check_output([self._executable, '--version']).decode('utf-8')
+            except:
+                self._banner = ''
+
         return self._banner
     
     language_info = {'name': 'idl',
@@ -71,7 +78,7 @@ class IDLKernel(Kernel):
         finally:
             signal.signal(signal.SIGINT, sig)
 
-        self.idlwrapper.run_command("!quiet=1 & !more=0 & defsysv,'!inline',0".rstrip(), timeout=None)
+        self.idlwrapper.run_command("!quiet=1 & defsysv,'!inline',0 & !more=0".rstrip(), timeout=None)
         # Compile IDL routines/functions
         dirname = os.path.dirname(os.path.abspath(__file__))
         self.idlwrapper.run_command(".compile "+dirname+"/snapshot.pro",timeout=None)

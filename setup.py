@@ -29,7 +29,7 @@ if svem_flag in sys.argv:
     sys.argv.remove(svem_flag)
 
 setup(name='IDL_kernel',
-      version='0.3',
+      version='0.4',
       description='A IDL kernel for IPython',
       long_description=readme,
       author='Luke Stagner',

@@ -112,7 +112,8 @@ class IDLKernel(Kernel):
             self.hist_cache.append(code.strip())
 
         interrupted = False
-        tfile = tempfile.NamedTemporaryFile(mode='w+t',dir=os.path.expanduser("~"))
+        tfile_code = tempfile.NamedTemporaryFile(mode='w+t',dir=os.path.expanduser("~"))
+        tfile_post = tempfile.NamedTemporaryFile(mode='w+t',dir=os.path.expanduser("~"))
         plot_dir = tempfile.mkdtemp(dir=os.path.expanduser("~"))
         plot_format = 'png'
 
@@ -126,14 +127,17 @@ class IDLKernel(Kernel):
                     ii_rsApk4JS = snapshot(outfile_c5BXq4dV)
                     wdelete
                 endfor
-	        endif
+	    endif
         end
         """ % locals()
 
         try:
-            tfile.file.write(code.rstrip()+postcall.rstrip())
-            tfile.file.close()
-            output = self.idlwrapper.run_command(".run "+tfile.name, timeout=None)
+            tfile_code.file.write(code.rstrip()+"\nend")
+            tfile_code.file.close()
+            tfile_post.file.write(postcall.rstrip())
+            tfile_post.file.close()
+            output = self.idlwrapper.run_command(".run "+tfile_code.name, timeout=None)
+            self.idlwrapper.run_command(".run "+tfile_post.name,timeout=None)
 
             # IDL annoying prints out ".run tmp..." command this removes it
             if os.path.basename(self._executable) == 'idl':
@@ -158,7 +162,8 @@ class IDLKernel(Kernel):
             output = self.idlwrapper.child.before + 'Restarting IDL'
             self._start_idl()
         finally:
-            tfile.close()
+            tfile_code.close()
+            tfile_post.close()
             rmtree(plot_dir)
 
         if not silent:

@@ -132,7 +132,7 @@ class IDLKernel(Kernel):
         """ % locals()
 
         try:
-            tfile_code.file.write(code.rstrip()+"\nend")
+            tfile_code.file.write(code.rstrip()+"\na_adfadfw=1\nend")
             tfile_code.file.close()
             tfile_post.file.write(postcall.rstrip())
             tfile_post.file.close()
